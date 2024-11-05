@@ -1,0 +1,309 @@
+/*
+ * @author     MrGreenscreen aka. TiBo
+ *
+ * @category   Mission Chief
+ *
+ * Skript zur automatischen Umbenennung von Wachen
+ * Version: 1.1
+ * 
+ * Beschreibung:
+ * Dieses Skript ruft eine Liste von Gebäuden ab, filtert nur relevante Wachen heraus und
+ * benennt sie basierend auf Standort und Landkreis-Kürzel automatisch um. Es nutzt dabei
+ * die OpenStreetMap-Geocoding API, um die Koordinaten in Standortinformationen umzuwandeln.
+ * 
+ * @license    Attribution-NonCommercial-NoDerivs 4.0 Unported <http://creativecommons.org/licenses/by-nc-nd/4.0/>
+ * Copyright © 2024
+ * Alle Rechte vorbehalten.
+ */
+
+/*
+ * Bekannte Fehler:
+ * - Kreisfreie Städte werden nicht richtig erkannt.
+ *          Status: WiP
+ */
+
+
+// EINSTELLUNGEN; Platzhalter: {DistrictAbbreviation}, {BOS}, {Location}
+var NewBuildingCaption = '{DistrictAbbreviation} / {BOS} / {Location}';
+var FilterBuildingType = [0, 2, 6, 9, 18, 19, 20]; // Nur Wachen-Typen: Feuerwehr, Rettungswache, Polizeiwache, THW usw.
+
+// Zuordnungstabelle für Landkreise und kreisfreie Städte in Bayern und Baden-Württemberg
+const districtAbbreviations = {
+    // Bayern - Landkreise
+    "Landkreis Aichach-Friedberg": "AIC",
+    "Landkreis Altötting": "AÖ",
+    "Landkreis Amberg-Sulzbach": "AS",
+    "Landkreis Ansbach": "AN",
+    "Landkreis Aschaffenburg": "AB",
+    "Landkreis Augsburg": "A",
+    "Landkreis Bad Kissingen": "KG",
+    "Landkreis Bad Tölz-Wolfratshausen": "TÖL",
+    "Landkreis Bamberg": "BA",
+    "Landkreis Bayreuth": "BT",
+    "Landkreis Berchtesgadener Land": "BGL",
+    "Landkreis Cham": "CHA",
+    "Landkreis Coburg": "CO",
+    "Landkreis Dachau": "DAH",
+    "Landkreis Deggendorf": "DEG",
+    "Landkreis Dillingen an der Donau": "DLG",
+    "Landkreis Dingolfing-Landau": "DGF",
+    "Landkreis Donau-Ries": "DON",
+    "Landkreis Ebersberg": "EBE",
+    "Landkreis Eichstätt": "EI",
+    "Landkreis Erding": "ED",
+    "Landkreis Erlangen-Höchstadt": "ERH",
+    "Landkreis Forchheim": "FO",
+    "Landkreis Freising": "FS",
+    "Landkreis Freyung-Grafenau": "FRG",
+    "Landkreis Fürstenfeldbruck": "FFB",
+    "Landkreis Fürth": "FÜ",
+    "Landkreis Garmisch-Partenkirchen": "GAP",
+    "Landkreis Günzburg": "GZ",
+    "Landkreis Haßberge": "HAS",
+    "Landkreis Hof": "HO",
+    "Landkreis Kelheim": "KEH",
+    "Landkreis Kitzingen": "KT",
+    "Landkreis Kronach": "KC",
+    "Landkreis Kulmbach": "KU",
+    "Landkreis Landsberg am Lech": "LL",
+    "Landkreis Landshut": "LA",
+    "Landkreis Lichtenfels": "LIF",
+    "Landkreis Lindau (Bodensee)": "LI",
+    "Landkreis Main-Spessart": "MSP",
+    "Landkreis Miesbach": "MB",
+    "Landkreis Miltenberg": "MIL",
+    "Landkreis Mühldorf am Inn": "MÜ",
+    "Landkreis München": "M",
+    "Landkreis Neuburg-Schrobenhausen": "ND",
+    "Landkreis Neumarkt in der Oberpfalz": "NM",
+    "Landkreis Neustadt an der Aisch-Bad Windsheim": "NEA",
+    "Landkreis Neustadt an der Waldnaab": "NEW",
+    "Landkreis Nürnberger Land": "LAU",
+    "Landkreis Oberallgäu": "OA",
+    "Landkreis Ostallgäu": "OAL",
+    "Landkreis Passau": "PA",
+    "Landkreis Pfaffenhofen an der Ilm": "PAF",
+    "Landkreis Regen": "REG",
+    "Landkreis Regensburg": "R",
+    "Landkreis Rhön-Grabfeld": "NES",
+    "Landkreis Rosenheim": "RO",
+    "Landkreis Roth": "RH",
+    "Landkreis Rottal-Inn": "PAN",
+    "Landkreis Schwandorf": "SAD",
+    "Landkreis Schweinfurt": "SW",
+    "Landkreis Starnberg": "STA",
+    "Landkreis Straubing-Bogen": "SR",
+    "Landkreis Tirschenreuth": "TIR",
+    "Landkreis Traunstein": "TS",
+    "Landkreis Unterallgäu": "MN",
+    "Landkreis Weilheim-Schongau": "WM",
+    "Landkreis Weißenburg-Gunzenhausen": "WUG",
+    "Landkreis Wunsiedel im Fichtelgebirge": "WUN",
+    "Landkreis Würzburg": "WÜ",
+
+    // Bayern - Kreisfreie Städte
+    "Stadt Amberg": "AM",
+    "Stadt Ansbach": "AN",
+    "Stadt Aschaffenburg": "AB",
+    "Stadt Augsburg": "A",
+    "Stadt Bamberg": "BA",
+    "Stadt Bayreuth": "BT",
+    "Stadt Coburg": "CO",
+    "Stadt Erlangen": "ER",
+    "Stadt Fürth": "FÜ",
+    "Stadt Hof": "HO",
+    "Stadt Ingolstadt": "IN",
+    "Stadt Kaufbeuren": "KF",
+    "Stadt Kempten (Allgäu)": "KE",
+    "Stadt Landshut": "LA",
+    "Stadt Memmingen": "MM",
+    "Stadt München": "M",
+    "Stadt Nürnberg": "N",
+    "Stadt Passau": "PA",
+    "Stadt Regensburg": "R",
+    "Stadt Rosenheim": "RO",
+    "Stadt Schwabach": "SC",
+    "Stadt Schweinfurt": "SW",
+    "Stadt Straubing": "SR",
+    "Stadt Weiden in der Oberpfalz": "WEN",
+    "Stadt Würzburg": "WÜ",
+
+    // Baden-Württemberg - Landkreise
+    "Landkreis Alb-Donau-Kreis": "UL",
+    "Landkreis Biberach": "BC",
+    "Landkreis Böblingen": "BB",
+    "Landkreis Bodenseekreis": "FN",
+    "Landkreis Breisgau-Hochschwarzwald": "FR",
+    "Landkreis Calw": "CW",
+    "Landkreis Emmendingen": "EM",
+    "Landkreis Enzkreis": "PF",
+    "Landkreis Esslingen": "ES",
+    "Landkreis Freudenstadt": "FDS",
+    "Landkreis Göppingen": "GP",
+    "Landkreis Heidenheim": "HDH",
+    "Landkreis Heilbronn": "HN",
+    "Landkreis Hohenlohekreis": "KÜN",
+    "Landkreis Karlsruhe": "KA",
+    "Landkreis Konstanz": "KN",
+    "Landkreis Lörrach": "LÖ",
+    "Landkreis Ludwigsburg": "LB",
+    "Landkreis Main-Tauber-Kreis": "TBB",
+    "Landkreis Neckar-Odenwald-Kreis": "MOS",
+    "Landkreis Ortenaukreis": "OG",
+    "Landkreis Ostalbkreis": "AA",
+    "Landkreis Rastatt": "RA",
+    "Landkreis Ravensburg": "RV",
+    "Landkreis Rems-Murr-Kreis": "WN",
+    "Landkreis Reutlingen": "RT",
+    "Landkreis Rhein-Neckar-Kreis": "HD",
+    "Landkreis Rottweil": "RW",
+    "Landkreis Schwäbisch Hall": "SHA",
+    "Landkreis Schwarzwald-Baar-Kreis": "VS",
+    "Landkreis Sigmaringen": "SIG",
+    "Landkreis Tübingen": "TÜ",
+    "Landkreis Tuttlingen": "TUT",
+    "Landkreis Waldshut": "WT",
+    "Landkreis Zollernalbkreis": "BL",
+
+    // Baden-Württemberg - Kreisfreie Städte
+    "Stadt Baden-Baden": "BAD",
+    "Stadt Freiburg im Breisgau": "FR",
+    "Stadt Heidelberg": "HD",
+    "Stadt Heilbronn": "HN",
+    "Stadt Karlsruhe": "KA",
+    "Stadt Mannheim": "MA",
+    "Stadt Pforzheim": "PF",
+    "Stadt Stuttgart": "S",
+    "Stadt Ulm": "UL"
+};
+
+// Map building types to BOS units
+const BOSUnitMapping = {
+    0: 'FW',   // Feuerwache
+    2: 'RD',   // Rettungswache
+    6: 'Pol',  // Polizeiwache
+    9: 'THW',  // THW-Ortsverband
+    18: 'FW',  // Feuerwache (Kleinwache)
+    19: 'Pol', // Polizeiwache (Kleinwache)
+    20: 'RD'   // Rettungswache (Kleinwache)
+};
+
+// CSRF-Token aus dem Meta-Tag abrufen
+const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+
+/**
+ * Verwendet eine Geocoding-API, um Standortnamen und Landkreis aus den Koordinaten zu ermitteln.
+ * @return Objekt mit { location, districtAbbreviation }
+ */
+async function GetLocationAndDistrictFromCoordinates(lat, lon) {
+  try {
+    const response = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json`);
+    const data = await response.json();
+    
+    // Standortname ermitteln (entweder nur erstes Wort oder "Bad" + zweites Wort falls vorhanden)
+    let location = data.address.city || data.address.town || data.address.village || "Unbekannter Standort";
+    let locationWords = location.split(" ");
+    if (locationWords[0] === "Bad" && locationWords.length > 1) {
+      location = locationWords.slice(0, 2).join(" ");
+    } else {
+      location = locationWords[0];
+    }
+
+    // Landkreis- oder Stadtabfrage
+    let district = data.address.county || data.address.city || "Unbekannter Landkreis";
+    let districtAbbreviation = districtAbbreviations[district] || "XX"; // Standardwert "XX" wenn keine Abkürzung gefunden wird
+
+    return { location, districtAbbreviation };
+  } catch (error) {
+    console.error(`Fehler beim Ermitteln von Standort und Landkreis für Koordinaten: ${lat}, ${lon}`, error);
+    return { location: "Unbekannter Standort", districtAbbreviation: "XX" };
+  }
+}
+
+/**
+ * Ruft die Gebäude-Liste asynchron ab und gibt diese zurück.
+ * @return Array
+ */
+async function GetBuildingsAsync() {
+  const response = await $.ajax({
+    type: 'GET',
+    dataType: 'json',
+    url: `https://www.leitstellenspiel.de/api/buildings`
+  });
+  return response;
+}
+
+/**
+ * Zeigt einen Fortschrittsindikator in der Konsole an.
+ * @param {number} current - Aktueller Fortschritt.
+ * @param {number} total - Gesamtanzahl der Elemente.
+ */
+function showProgress(current, total) {
+  const percentage = Math.round((current / total) * 100);
+  console.log(`Fortschritt: ${current} von ${total} (${percentage}%)`);
+}
+
+// Skript-Initialisierung
+(async function() {
+  console.log('Starte Umbenennung der Wachen...');
+
+  // Gebäude-Liste abrufen
+  var IBuildingList = await GetBuildingsAsync();
+
+  // Gebäude nach Typ filtern (nur Wachen)
+  IBuildingList = IBuildingList.filter(Building => FilterBuildingType.includes(Building.building_type));
+
+  // Gefundene Gebäude vor Umbenennung anzeigen
+  console.log(`Gefundene Wachen: ${IBuildingList.length}`);
+  IBuildingList.forEach(Building => {
+    console.log(`Gebäude ID: ${Building.id}, Name: ${Building.caption}, Typ: ${Building.building_type}`);
+  });
+
+  let count = 0;
+
+  for (const Building of IBuildingList) {
+    count++;
+    showProgress(count, IBuildingList.length);
+
+    // Standort und Landkreis-Abkürzung basierend auf Koordinaten ermitteln
+    const { location, districtAbbreviation } = await GetLocationAndDistrictFromCoordinates(Building.latitude, Building.longitude);
+    const BOS = BOSUnitMapping[Building.building_type] || 'BOS'; // BOS-Einheit basierend auf dem Gebäudetyp
+    console.log(`Geocodierter Standort für Gebäude ID ${Building.id}: ${location}, Landkreis-Kürzel: ${districtAbbreviation}, BOS: ${BOS}`);
+
+    // Neuen Gebäudenamen erstellen
+    var NewCaptionScheme = NewBuildingCaption.replace('{DistrictAbbreviation}', districtAbbreviation).replace('{BOS}', BOS).replace('{Location}', location);
+
+    if (Building.caption === NewCaptionScheme) continue;
+
+    console.log(`Umbenennung wird versucht. Alter Name: ${Building.caption} / Neuer Name: ${NewCaptionScheme}`);
+
+    try {
+      // Formulardaten vorbereiten
+      var formData = new FormData();
+      formData.append('utf8', '✓');
+      formData.append('_method', 'put');
+      formData.append('authenticity_token', csrfToken);
+      formData.append('building[name]', NewCaptionScheme);
+      formData.append('building[personal_count_target]', '0');
+      formData.append('building[leitstelle_building_id]', '');
+      formData.append('building[vehicle_graphic_id]', '');
+      formData.append('building[image]', new Blob(), '');
+
+      // Anfrage mit form-data senden
+      const response = await $.ajax({
+        type: 'POST',
+        url: `https://www.leitstellenspiel.de/buildings/${Building.id}`,
+        data: formData,
+        processData: false,
+        contentType: false,
+      });
+
+      console.log(`Gebäude ID ${Building.id} erfolgreich aktualisiert.`);
+      await new Promise(resolve => setTimeout(resolve, Math.floor(Math.random() * 200) + 100));
+    } catch (error) {
+      console.error(`Fehler beim Aktualisieren der Gebäude ID: ${Building.id}`, error);
+    }
+  }
+
+  console.log('Umbenennung der Wachen abgeschlossen!');
+})();
