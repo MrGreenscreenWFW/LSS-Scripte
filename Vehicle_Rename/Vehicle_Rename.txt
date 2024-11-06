@@ -8,9 +8,7 @@
  * Version: 1.1
  * 
  * Beschreibung:
- * Dieses Skript ruft eine Liste von Gebäuden ab, filtert nur relevante Wachen heraus und
- * benennt sie basierend auf Standort und Landkreis-Kürzel automatisch um. Es nutzt dabei
- * die OpenStreetMap-Geocoding API, um die Koordinaten in Standortinformationen umzuwandeln.
+ * Dieses Script benennt die Wachen nach dem entsprechenden Vorgaben
  * 
  * @license    Attribution-NonCommercial-NoDerivs 4.0 Unported <http://creativecommons.org/licenses/by-nc-nd/4.0/>
  * Copyright © 2024
