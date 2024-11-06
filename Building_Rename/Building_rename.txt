@@ -4,7 +4,7 @@
  * @category   Mission Chief
  *
  * Skript zur automatischen Umbenennung von Wachen
- * Version: 1.0
+ * Version: 1.1
  * 
  * Beschreibung:
  * Dieses Skript ruft eine Liste von Gebäuden ab, filtert nur relevante Wachen heraus und
@@ -15,13 +15,6 @@
  * Copyright © 2024
  * Alle Rechte vorbehalten.
  */
-
-/*
- * Bekannte Fehler:
- * - Kreisfreie Städte werden nicht richtig erkannt.
- *          Status: WiP
- */
-
 
 // EINSTELLUNGEN; Platzhalter: {DistrictAbbreviation}, {BOS}, {Location}
 var NewBuildingCaption = '{DistrictAbbreviation} / {BOS} / {Location}';
@@ -192,7 +185,9 @@ const BOSUnitMapping = {
 const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 
 /**
- * Verwendet eine Geocoding-API, um Standortnamen und Landkreis aus den Koordinaten zu ermitteln.
+ * Verwendet eine Geocoding-API, um Standortnamen und Landkreis oder Stadt aus den Koordinaten zu ermitteln.
+ * Falls kein Landkreis gefunden wird, vergleicht es die Stadt mit der Liste der kreisfreien Städte.
+ * Zusätzliche Felder werden als Fallback geprüft.
  * @return Objekt mit { location, districtAbbreviation }
  */
 async function GetLocationAndDistrictFromCoordinates(lat, lon) {
@@ -205,17 +200,35 @@ async function GetLocationAndDistrictFromCoordinates(lat, lon) {
     let locationWords = location.split(" ");
     if (locationWords[0] === "Bad" && locationWords.length > 1) {
       location = locationWords.slice(0, 2).join(" ");
+    } else if (locationWords[0] === "St." && locationWords.length > 1) {
+      location = locationWords.slice(0, 2).join(" ");
     } else {
       location = locationWords[0];
     }
 
-    // Landkreis- oder Stadtabfrage
-    let district = data.address.county || data.address.city || "Unbekannter Landkreis";
-    let districtAbbreviation = districtAbbreviations[district] || "XX"; // Standardwert "XX" wenn keine Abkürzung gefunden wird
+    // Primäre Abfrage für Landkreis oder Stadt
+    let district = data.address.county || data.address.city || data.address.state_district || data.address.municipality;
+    let districtAbbreviation = districtAbbreviations[district];
+
+    // Fallback: Stadt mit kreisfreien Städten abgleichen, falls keine Zuordnung gefunden wird
+    if (!districtAbbreviation && data.address.city) {
+      districtAbbreviation = districtAbbreviations[`Stadt ${data.address.city}`];
+    }
+
+    // Weitere Fallbacks, falls kein direkter Landkreis oder Stadt gefunden wurde
+    if (!districtAbbreviation) {
+      district = data.address.town || data.address.suburb || "Unbekannter Bezirk";
+      districtAbbreviation = districtAbbreviations[district] || "XX"; // Standardwert "XX" wenn keine Abkürzung gefunden wird
+
+      // Loggen für Diagnosezwecke, falls nicht erkannt
+      if (districtAbbreviation === "XX") {
+        console.warn(`Kein Landkreis oder kreisfreie Stadt erkannt für Koordinaten: ${lat}, ${lon}. Geocoding-Ergebnisse:`, data.address);
+      }
+    }
 
     return { location, districtAbbreviation };
   } catch (error) {
-    console.error(`Fehler beim Ermitteln von Standort und Landkreis für Koordinaten: ${lat}, ${lon}`, error);
+    console.error(`Fehler beim Ermitteln von Standort und Landkreis/Stadt für Koordinaten: ${lat}, ${lon}`, error);
     return { location: "Unbekannter Standort", districtAbbreviation: "XX" };
   }
 }
@@ -264,6 +277,12 @@ function showProgress(current, total) {
   for (const Building of IBuildingList) {
     count++;
     showProgress(count, IBuildingList.length);
+
+    // Überprüfen, ob die ersten zwei Buchstaben großgeschrieben sind
+    if (/^[A-Z]{2}/.test(Building.caption)) {
+      console.log(`Überspringe Gebäude ID ${Building.id}, da der Name bereits mit zwei Großbuchstaben beginnt.`);
+      continue;
+    }
 
     // Standort und Landkreis-Abkürzung basierend auf Koordinaten ermitteln
     const { location, districtAbbreviation } = await GetLocationAndDistrictFromCoordinates(Building.latitude, Building.longitude);
