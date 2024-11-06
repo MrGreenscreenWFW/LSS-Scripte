@@ -1,6 +1,6 @@
 /*
- * @author     cfHxqA
- * @modified   MrGreenscreen aka. TiBo
+ * @inspiredby cfHxqA
+ * @author     MrGreenscreen aka. TiBo
  *
  * @category   Mission Chief
  *
