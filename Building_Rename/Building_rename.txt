@@ -303,10 +303,6 @@ function showProgress(current, total) {
       formData.append('_method', 'put');
       formData.append('authenticity_token', csrfToken);
       formData.append('building[name]', NewCaptionScheme);
-      formData.append('building[personal_count_target]', '0');
-      formData.append('building[leitstelle_building_id]', '');
-      formData.append('building[vehicle_graphic_id]', '');
-      formData.append('building[image]', new Blob(), '');
 
       // Anfrage mit form-data senden
       const response = await $.ajax({
