@@ -77,7 +77,7 @@ async function GetLocationAndDistrictFromCoordinates(lat, lon) {
     }
 
     // Primäre Abfrage für Landkreis oder Stadt
-    let district = data.address.county || data.address.city || data.address.state_district || data.adress.town || data.address.municipality;
+    let district = data.address.county || data.address.city || data.address.state_district || data.address.municipality;
     let districtAbbreviation = districtAbbreviations[district];
 
     // Fallback: Stadt mit kreisfreien Städten abgleichen, falls keine Zuordnung gefunden wird
