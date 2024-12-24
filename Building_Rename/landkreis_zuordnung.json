@@ -1,5 +1,4 @@
 {
-//Baden-Wüttenberg
   "Landkreis Alb-Donau-Kreis": "UL",
   "Landkreis Biberach": "BC",
   "Landkreis Böblingen": "BB",
@@ -39,7 +38,6 @@
   "Landkreis Waldshut": "WT",
   "Landkreis Zollernalbkreis": "BL",
 
-//Bayern,
   "Landkreis Aichach-Friedberg": "AIC",
   "Landkreis Altötting": "AÖ",
   "Landkreis Amberg-Sulzbach": "AS",
@@ -128,10 +126,8 @@
   "Landkreis Würzburg": "WÜ",
   "Kreisfreie Stadt Würzburg": "WÜ",
 
-//Berlin
-  "Berlin": "B"
+  "Berlin": "B",
 
-//Brandenburg
   "Landkreis Barnim": "BAR",
   "Landkreis Dahme-Spreewald": "LDS",
   "Landkreis Elbe-Elster": "EE",
@@ -151,14 +147,11 @@
   "Kreisfreie Stadt Frankfurt (Oder)": "FF",
   "Kreisfreie Stadt Potsdam": "P",
 
-//Bremen
   "Bremen": "HB",
   "Bremerhaven": "HB",
 
-//Hamburg
   "Hamburg": "HH",
 
-//Hessen
   "Landkreis Bergstraße": "HP",
   "Landkreis Darmstadt-Dieburg": "DA",
   "Landkreis Fulda": "FD",
@@ -186,7 +179,6 @@
   "Kreisfreie Stadt Offenbach am Main": "OF",
   "Kreisfreie Stadt Wiesbaden": "WI",
 
-//Mecklenburg-Vorpommern
   "Landkreis Ludwigslust-Parchim": "LWL",
   "Landkreis Mecklenburgische Seenplatte": "MST",
   "Landkreis Nordwestmecklenburg": "NWM",
@@ -196,7 +188,6 @@
   "Kreisfreie Stadt Rostock": "HRO",
   "Kreisfreie Stadt Schwerin": "SN",
 
-//Niedersachsen
   "Landkreis Ammerland": "WST",
   "Landkreis Aurich": "AUR",
   "Landkreis Celle": "CE",
@@ -242,7 +233,6 @@
   "Kreisfreie Stadt Wilhelmshaven": "WHV",
   "Kreisfreie Stadt Wolfsburg": "WOB",
 
-//Nordrhein-Westfalen
   "Landkreis Bielefeld (Stadt)": "BI",
   "Landkreis Bochum (Stadt)": "BO",
   "Landkreis Bonn (Stadt)": "BN",
@@ -294,7 +284,6 @@
   "Landkreis Warendorf": "WAF",
   "Landkreis Wuppertal (Stadt)": "W",
 
-//Rheinlandpfalz
   "Landkreis Ahrweiler": "AW",
   "Landkreis Altenkirchen (Westerwald)": "AK",
   "Landkreis Alzey-Worms": "AZ",
@@ -332,7 +321,6 @@
   "Kreisfreie Stadt Worms": "WO",
   "Kreisfreie Stadt Zweibrücken": "ZW",
 
-//Saarland
   "Landkreis Merzig-Wadern": "MZG",
   "Landkreis Neunkirchen": "NK",
   "Landkreis Saarlouis": "SLS",
@@ -340,7 +328,6 @@
   "Landkreis St. Wendel": "WND",
   "Kreisfreie Stadt Saarbrücken": "SB",
 
-//Sachsen
   "Landkreis Bautzen": "BZ",
   "Landkreis Erzgebirgskreis": "ERZ",
   "Landkreis Görlitz": "GR",
@@ -355,7 +342,6 @@
   "Kreisfreie Stadt Dresden": "DD",
   "Kreisfreie Stadt Leipzig": "L",
 
-//Sachsen-Anhalt
   "Landkreis Altmarkkreis Salzwedel": "SAW",
   "Landkreis Anhalt-Bitterfeld": "ABI",
   "Landkreis Börde": "BK",
@@ -371,7 +357,6 @@
   "Kreisfreie Stadt Halle (Saale)": "HAL",
   "Kreisfreie Stadt Magdeburg": "MD",
 
-//Schleswig-Holstein
   "Landkreis Dithmarschen": "HEI",
   "Landkreis Herzogtum Lauenburg": "RZ",
   "Landkreis Nordfriesland": "NF",
@@ -388,7 +373,6 @@
   "Kreisfreie Stadt Lübeck": "HL",
   "Kreisfreie Stadt Neumünster": "NMS",
 
-//Thürringen
   "Landkreis Altenburger Land": "ABG",
   "Landkreis Eichsfeld": "EIC",
   "Landkreis Gotha": "GTH",
@@ -411,5 +395,5 @@
   "Kreisfreie Stadt Jena": "J",
   "Kreisfreie Stadt Suhl": "SHL",
   "Kreisfreie Stadt Weimar": "WE",
-  "Kreisfreie Stadt Eisenach": "EA",
+  "Kreisfreie Stadt Eisenach": "EA"
 }
