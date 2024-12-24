@@ -152,7 +152,7 @@ function showProgress(current, total) {
     showProgress(count, IBuildingList.length);
 
     // Überprüfen, ob die ersten zwei Buchstaben großgeschrieben sind
-    if (/^[A-Z]{2}/.test(Building.caption)) {
+    if (/^[A-Z]{2}/.test(Building.caption) && !/^XX/.test(Building.caption)) {
       console.log(`Überspringe Gebäude ID ${Building.id}, da der Name bereits mit zwei Großbuchstaben beginnt.`);
       continue;
     }
