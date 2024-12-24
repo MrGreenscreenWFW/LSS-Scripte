@@ -1,5 +1,4 @@
 {
-    // Bayern - Landkreise
     "Landkreis Aichach-Friedberg": "AIC",
     "Landkreis Altötting": "AÖ",
     "Landkreis Amberg-Sulzbach": "AS",
@@ -70,8 +69,7 @@
     "Landkreis Weißenburg-Gunzenhausen": "WUG",
     "Landkreis Wunsiedel im Fichtelgebirge": "WUN",
     "Landkreis Würzburg": "WÜ",
-
-    // Bayern - Kreisfreie Städte
+    
     "Stadt Amberg": "AM",
     "Stadt Ansbach": "AN",
     "Stadt Aschaffenburg": "AB",
@@ -98,7 +96,6 @@
     "Stadt Weiden in der Oberpfalz": "WEN",
     "Stadt Würzburg": "WÜ",
 
-    // Baden-Württemberg - Landkreise
     "Landkreis Alb-Donau-Kreis": "UL",
     "Landkreis Biberach": "BC",
     "Landkreis Böblingen": "BB",
@@ -135,7 +132,6 @@
     "Landkreis Waldshut": "WT",
     "Landkreis Zollernalbkreis": "BL",
 
-    // Baden-Württemberg - Kreisfreie Städte
     "Stadt Baden-Baden": "BAD",
     "Stadt Freiburg im Breisgau": "FR",
     "Stadt Heidelberg": "HD",
