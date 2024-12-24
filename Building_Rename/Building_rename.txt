@@ -1,6 +1,6 @@
 /*
  * @author     MrGreenscreen aka. TiBo
- *
+ * @credits    The Watcher - Watch at me!
  * @category   Mission Chief
  *
  * Skript zur automatischen Umbenennung von Wachen
