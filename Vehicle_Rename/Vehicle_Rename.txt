@@ -4,11 +4,11 @@
  *
  * @category   Mission Chief
  *
- * Skript zur automatischen Umbenennung von Wachen
+ * Skript zur automatischen Umbenennung von Farhzeugen
  * Version: 1.1
  * 
  * Beschreibung:
- * Dieses Script benennt die Wachen nach dem entsprechenden Vorgaben
+ * Dieses Script benennt die Farhzeuge nach dem entsprechenden Vorgaben
  * 
  * @license    Attribution-NonCommercial-NoDerivs 4.0 Unported <http://creativecommons.org/licenses/by-nc-nd/4.0/>
  * Copyright © 2024
@@ -28,7 +28,7 @@ console.log('CSRF-Token:', csrfToken);
  * Ruft die Fahrzeug-Liste asynchron ab und gibt diese zurück.
  * @return Array
  */
-async function GetVehiclesAsync() {
+async function GetVehiclesNameByIdAsync() {
   const response = await fetch('https://www.leitstellenspiel.de/api/vehicles', {
     method: 'GET',
     headers: {
