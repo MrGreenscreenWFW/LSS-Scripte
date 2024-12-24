@@ -4,7 +4,7 @@
  * @category   Mission Chief
  *
  * Skript zur automatischen Umbenennung von Wachen
- * Version: 1.1
+ * Version: 1.2
  * 
  * Beschreibung:
  * Dieses Skript ruft eine Liste von Gebäuden ab, filtert nur relevante Wachen heraus und
