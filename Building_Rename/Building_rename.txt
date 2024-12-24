@@ -28,14 +28,17 @@ let districtAbbreviations = {};
 **/
 
 async function LoadDistrictAbbreviations() {
- try {
+  try {
     const response = await fetch ('https://raw.githubusercontent.com/MrGreenscreenWFW/LSS-Scripte/refs/heads/main/Building_Rename/landkreis_zuordnung.json');
     if (!response.ok) {
         throw new Error(`Fehler beim Laden der Zuordnungen: ${response.statusText}`);
     }
-
-
-
+    districtAbbreviations = await response.json();
+    console.log('Landkreis-Zuordnung erfolgreich geladen.');
+  } catch (error) {
+    console.error('Fehler beim Laden der Zuordnung;', error);
+  }
+}
 
 // Map building types to BOS units
 const BOSUnitMapping = {
@@ -126,6 +129,9 @@ function showProgress(current, total) {
 // Skript-Initialisierung
 (async function() {
   console.log('Starte Umbenennung der Wachen...');
+
+  // Landkreiszuordnung Laden
+  await LoadDistrictAbbreviations();
 
   // Gebäude-Liste abrufen
   var IBuildingList = await GetBuildingsAsync();
