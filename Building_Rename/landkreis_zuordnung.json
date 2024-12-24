@@ -1,5 +1,6 @@
 {
   "Landkreis Alb-Donau-Kreis": "UL",
+  "Alb-Donau-Kreis": "UL",
   "Landkreis Biberach": "BC",
   "Landkreis Böblingen": "BB",
   "Landkreis Bodenseekreis": "FN",
@@ -83,6 +84,7 @@
   "Landkreis Ingolstadt (Stadt)": "IN",
   "Landkreis Kelheim": "KEH",
   "Landkreis Kempten (Stadt)": "KE",
+  "Stadt Kempten (Allgäu)": "KE",
   "Landkreis Kitzingen": "KT",
   "Landkreis Kronach": "KC",
   "Landkreis Kulmbach": "KU",
@@ -91,6 +93,7 @@
   "Kreisfreie Stadt Landshut": "LA",
   "Landkreis Lichtenfels": "LIF",
   "Landkreis Lindau (Bodensee)": "LI",
+  "Landkreis Lindau": "LI",
   "Landkreis Main-Spessart": "MSP",
   "Landkreis Memmingen (Stadt)": "MM",
   "Stadt Memmingen": "MM",
@@ -127,6 +130,7 @@
   "Landkreis Weißenburg-Gunzenhausen": "WUG",
   "Landkreis Würzburg": "WÜ",
   "Kreisfreie Stadt Würzburg": "WÜ",
+  "Landkreis Neu-Ulm": "NU",
 
   "Berlin": "B",
 
