@@ -15,6 +15,12 @@ Dieses JavaScript-Skript wurde entwickelt, um in [Mission Chief](https://www.lei
 2. Kopiere den gesamten Skriptinhalt und füge ihn in die Konsole ein.
 3. Drücke `Enter`, um das Skript auszuführen.
 
+## Versionen
+1. **Building_rename**
+  - Verwendet nur Merkmale aus dem Punkt Merkmale
+2. **Building_rename_Stadtzuordnung**
+  - Hat zusätzlich eine Liste für die Stadtkürzel nach Opta hinterlegt. (Diese ist in Arbeit und noch recht klein. Wer hier zur Erweiterung beitragen möchte jederzeit gerne.)
+
 ## Konfiguration
 Die folgenden Variablen können an die eigenen Bedürfnisse angepasst werden:
 - **`NewBuildingCaption`**: Schema für die neuen Namen der Wachen. Platzhalter: 
