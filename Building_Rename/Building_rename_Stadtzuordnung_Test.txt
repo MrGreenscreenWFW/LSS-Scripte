@@ -1,56 +1,40 @@
-/*
- * @author     MrGreenscreen aka. TiBo
- * @credits    The Watcher - Watch at me!
- * @category   Mission Chief
- *
- * Skript zur automatischen Umbenennung von Wachen
- * Version: 1.2
- * 
- * Beschreibung:
- * Dieses Skript ruft eine Liste von Gebäuden ab, filtert nur relevante Wachen heraus und
- * benennt sie basierend auf Standort und Landkreis-Kürzel automatisch um. Es nutzt dabei
- * die OpenStreetMap-Geocoding API, um die Koordinaten in Standortinformationen umzuwandeln.
- * 
- * @license    Attribution-NonCommercial-NoDerivs 4.0 Unported <http://creativecommons.org/licenses/by-nc-nd/4.0/>
- * Copyright © 2024
- * Alle Rechte vorbehalten.
- */
-
 // EINSTELLUNGEN; Platzhalter: {DistrictAbbreviation}, {BOS}, {Location}
 var NewBuildingCaption = '{DistrictAbbreviation} / {BOS} / {Location}';
-var FilterBuildingType = [0, 2, 6, 9, 18, 19, 20]; // Nur Wachen-Typen: Feuerwehr, Rettungswache, Polizeiwache, THW usw.
+var FilterBuildingType = [0, 2, 6, 9, 18, 19, 20]; // Nur Wachen-Typen
 
-// Zuordnungstabelle für Landkreise und kreisfreie Städte in Bayern und Baden-Württemberg
+// Zuordnungstabelle für Landkreise und kreisfreie Städte
 let districtAbbreviations = {};
-let stadt_zuordnung = {};
+let cityMapping = {};
 
 /**
  * Laden der Landkreiszuordnung von Extern
 **/
-
 async function LoadDistrictAbbreviations() {
   try {
     const response = await fetch ('https://raw.githubusercontent.com/MrGreenscreenWFW/LSS-Scripte/refs/heads/main/Building_Rename/landkreis_zuordnung.json');
     if (!response.ok) {
-        throw new Error(`Fehler beim Laden der Zuordnungen(LK und KFS): ${response.statusText}`);
+        throw new Error(`Fehler beim Laden der Zuordnungen: ${response.statusText}`);
     }
     districtAbbreviations = await response.json();
     console.log('Landkreis-Zuordnung erfolgreich geladen.');
   } catch (error) {
-    console.error('Fehler beim Laden der Zuordnung(LK und KFS);', error);
+    console.error('Fehler beim Laden der Zuordnung;', error);
   }
 }
 
-async function Loadstadtzuordnung() {
+/**
+ * Laden der Stadtzuordnung von Extern
+**/
+async function LoadCityMapping() {
   try {
-    const response = await fetch ('https://raw.githubusercontent.com/MrGreenscreenWFW/LSS-Scripte/refs/heads/main/Building_Rename/stadt_zuordnung.json');
+    const response = await fetch('https://raw.githubusercontent.com/MrGreenscreenWFW/LSS-Scripte/refs/heads/main/Building_Rename/stadt_zuordnung.json');
     if (!response.ok) {
-        throw new Error(`Fehler beim Laden der Zuordnungen (Städte): ${response.statusText}`);
+        throw new Error(`Fehler beim Laden der Stadtzuordnungen: ${response.statusText}`);
     }
-    stadt_zuordnung = await response.json();
-    console.log('Landkreis-Zuordnung erfolgreich geladen.');
+    cityMapping = await response.json();
+    console.log('Stadt-Zuordnung erfolgreich geladen.');
   } catch (error) {
-    console.error('Fehler beim Laden der Zuordnung(Städte);', error);
+    console.error('Fehler beim Laden der Stadtzuordnung:', error);
   }
 }
 
@@ -65,124 +49,42 @@ const BOSUnitMapping = {
     20: 'RD'   // Rettungswache (Kleinwache)
 };
 
-// CSRF-Token aus dem Meta-Tag abrufen
-const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
-
 /**
  * Verwendet eine Geocoding-API, um Standortnamen und Landkreis oder Stadt aus den Koordinaten zu ermitteln.
- * Falls kein Landkreis gefunden wird, vergleicht es die Stadt mit der Liste der kreisfreien Städte.
- * Zusätzliche Felder werden als Fallback geprüft.
+ * Falls kein Landkreis gefunden wird, vergleicht es die Stadt mit der Liste der Zuordnungen.
  * @return Objekt mit { location, districtAbbreviation }
  */
 async function GetLocationAndDistrictFromCoordinates(lat, lon) {
   try {
-    // Geocoding-API verwenden
-    console.log(`Verwende Geocoding-API für Koordinaten: ${lat}, ${lon}`);
     const response = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json`);
     const data = await response.json();
 
-    // Standortname ermitteln (city, town oder village)
-    let locationCandidates = [
-      data.address.city,
-      data.address.town,
-      data.address.village
-    ].filter(Boolean); // Filtere ungültige Werte heraus
+    let location = data.address.city || data.address.town || data.address.village || "Unbekannter Standort";
 
-    console.log(`Potenzielle Standorte: ${locationCandidates.join(", ")}`);
+    // Stadtzuordnung überprüfen
+    let districtAbbreviation = cityMapping[location];
 
-    // Prüfen, ob eine der Städte in der Stadtzuordnung vorhanden ist
-    let matchedCity = null;
-    for (const candidate of locationCandidates) {
-      const cleanedCandidate = candidate.trim().toLowerCase();
-      console.log(`Prüfe Stadt: ${candidate} (bereinigt: ${cleanedCandidate}) gegen Stadtzuordnung...`);
-
-      // Exakte Übereinstimmung prüfen
-      matchedCity = Object.keys(stadt_zuordnung).find(
-        key => key.toLowerCase() === cleanedCandidate
-      );
-
-      if (matchedCity) {
-        console.log(`Exakte Übereinstimmung gefunden: ${matchedCity}`);
-        break;
-      }
-
-      // Teilübereinstimmung prüfen
-      matchedCity = Object.keys(stadt_zuordnung).find(
-        key => cleanedCandidate.includes(key.toLowerCase()) || key.toLowerCase().includes(cleanedCandidate)
-      );
-
-      if (matchedCity) {
-        console.log(`Teilübereinstimmung gefunden: ${matchedCity}`);
-        break;
-      }
-    }
-
-    if (matchedCity) {
-      console.log(`Stadtzuordnung erfolgreich für: ${matchedCity}`);
-      const districtAbbreviation = stadt_zuordnung[matchedCity];
-      return { location: matchedCity, districtAbbreviation };
-    }
-
-    // Keine Übereinstimmung gefunden, Log für Debugging
-    console.warn(`Keine Stadtzuordnung gefunden. Verfügbare Städte in Stadtzuordnung: ${Object.keys(stadt_zuordnung).join(", ")}`);
-
-    // Primäre Abfrage für Landkreis oder Stadt
-    console.log(`Starte primäre Abfrage für Koordinaten: ${lat}, ${lon}`);
-    let district = data.address.county || data.address.city || data.address.state_district || data.address.municipality;
-    let districtAbbreviation = districtAbbreviations[district];
-
-    // Fallback: Stadt mit kreisfreien Städten abgleichen, falls keine Zuordnung gefunden wird
-    if (!districtAbbreviation && data.address.city) {
-      districtAbbreviation = districtAbbreviations[`Stadt ${data.address.city}`];
-    }
-
-    // Weitere Fallbacks, falls kein direkter Landkreis oder Stadt gefunden wurde
+    // Wenn keine Stadtzuordnung gefunden wurde, auf Landkreiszuordnung zurückfallen
     if (!districtAbbreviation) {
-      district = data.address.town || data.address.suburb || data.address.neighbourhood || "Unbekannter Bezirk";
-      districtAbbreviation = districtAbbreviations[district] || "XX"; // Standardwert "XX" wenn keine Abkürzung gefunden wird
-
-      // Loggen für Diagnosezwecke, falls nicht erkannt
-      if (districtAbbreviation === "XX") {
-        console.warn(`Kein Landkreis oder kreisfreie Stadt erkannt für Koordinaten: ${lat}, ${lon}. Geocoding-Ergebnisse:`, data.address);
-      }
+      console.warn(`Stadt nicht in der Zuordnung gefunden: ${location}`);
+      let district = data.address.county || "Unbekannter Bezirk";
+      districtAbbreviation = districtAbbreviations[district] || "XX";
     }
 
-    return { location: locationCandidates[0] || "Unbekannter Standort", districtAbbreviation };
+    return { location, districtAbbreviation };
   } catch (error) {
     console.error(`Fehler beim Ermitteln von Standort und Landkreis/Stadt für Koordinaten: ${lat}, ${lon}`, error);
     return { location: "Unbekannter Standort", districtAbbreviation: "XX" };
   }
 }
 
-/**
- * Ruft die Gebäude-Liste asynchron ab und gibt diese zurück.
- * @return Array
- */
-async function GetBuildingsAsync() {
-  const response = await $.ajax({
-    type: 'GET',
-    dataType: 'json',
-    url: `https://www.leitstellenspiel.de/api/buildings`
-  });
-  return response;
-}
-
-/**
- * Zeigt einen Fortschrittsindikator in der Konsole an.
- * @param {number} current - Aktueller Fortschritt.
- * @param {number} total - Gesamtanzahl der Elemente.
- */
-function showProgress(current, total) {
-  const percentage = Math.round((current / total) * 100);
-  console.log(`Fortschritt: ${current} von ${total} (${percentage}%)`);
-}
-
 // Skript-Initialisierung
 (async function() {
   console.log('Starte Umbenennung der Wachen...');
 
-  // Landkreiszuordnung Laden
+  // Landkreiszuordnung und Stadtzuordnung laden
   await LoadDistrictAbbreviations();
+  await LoadCityMapping();
 
   // Gebäude-Liste abrufen
   var IBuildingList = await GetBuildingsAsync();
@@ -190,11 +92,7 @@ function showProgress(current, total) {
   // Gebäude nach Typ filtern (nur Wachen)
   IBuildingList = IBuildingList.filter(Building => FilterBuildingType.includes(Building.building_type));
 
-  // Gefundene Gebäude vor Umbenennung anzeigen
   console.log(`Gefundene Wachen: ${IBuildingList.length}`);
-  IBuildingList.forEach(Building => {
-    console.log(`Gebäude ID: ${Building.id}, Name: ${Building.caption}, Typ: ${Building.building_type}`);
-  });
 
   let count = 0;
 
@@ -202,34 +100,26 @@ function showProgress(current, total) {
     count++;
     showProgress(count, IBuildingList.length);
 
-    // Überprüfen, ob die ersten zwei Buchstaben großgeschrieben sind
     if (/^[A-Z]{2}/.test(Building.caption) && !/^XX/.test(Building.caption)) {
       console.log(`Überspringe Gebäude ID ${Building.id}, da der Name bereits mit zwei Großbuchstaben beginnt.`);
       continue;
     }
 
-    // Standort und Landkreis-Abkürzung basierend auf Koordinaten ermitteln
     const { location, districtAbbreviation } = await GetLocationAndDistrictFromCoordinates(Building.latitude, Building.longitude);
-    const BOS = BOSUnitMapping[Building.building_type] || 'BOS'; // BOS-Einheit basierend auf dem Gebäudetyp
-    console.log(`Geocodierter Standort für Gebäude ID ${Building.id}: ${location}, Landkreis-Kürzel: ${districtAbbreviation}, BOS: ${BOS}`);
+    const BOS = BOSUnitMapping[Building.building_type] || 'BOS';
 
-    // Neuen Gebäudenamen erstellen
     var NewCaptionScheme = NewBuildingCaption.replace('{DistrictAbbreviation}', districtAbbreviation).replace('{BOS}', BOS).replace('{Location}', location);
 
     if (Building.caption === NewCaptionScheme) continue;
 
-    console.log(`Umbenennung wird versucht. Alter Name: ${Building.caption} / Neuer Name: ${NewCaptionScheme}`);
-
     try {
-      // Formulardaten vorbereiten
       var formData = new FormData();
       formData.append('utf8', '✓');
       formData.append('_method', 'put');
       formData.append('authenticity_token', csrfToken);
       formData.append('building[name]', NewCaptionScheme);
 
-      // Anfrage mit form-data senden
-      const response = await $.ajax({
+      await $.ajax({
         type: 'POST',
         url: `https://www.leitstellenspiel.de/buildings/${Building.id}`,
         data: formData,
