@@ -1,3 +1,21 @@
+/*
+ * @author     MrGreenscreen aka. TiBo
+ * @credits    The Watcher - Watch at me!
+ * @category   Mission Chief
+ *
+ * Skript zur automatischen Umbenennung von Wachen mit Namenszuordnung
+ * Version: 1.3
+ * 
+ * Beschreibung:
+ * Dieses Skript ruft eine Liste von Gebäuden ab, filtert nur relevante Wachen heraus und
+ * benennt sie basierend auf Standort und Landkreis-Kürzel automatisch um. Es nutzt dabei
+ * die OpenStreetMap-Geocoding API, um die Koordinaten in Standortinformationen umzuwandeln.
+ * 
+ * @license    Attribution-NonCommercial-NoDerivs 4.0 Unported <http://creativecommons.org/licenses/by-nc-nd/4.0/>
+ * Copyright © 2024
+ * Alle Rechte vorbehalten.
+ */
+
 // EINSTELLUNGEN; Platzhalter: {DistrictAbbreviation}, {BOS}, {Location}
 var NewBuildingCaption = '{DistrictAbbreviation} / {BOS} / {Location}';
 var FilterBuildingType = [0, 2, 6, 9, 18, 19, 20]; // Nur Wachen-Typen
