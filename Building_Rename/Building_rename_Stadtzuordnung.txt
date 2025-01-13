@@ -55,7 +55,8 @@ async function LoadCityMapping() {
     console.error('Fehler beim Laden der Stadtzuordnung:', error);
   }
 }
-
+// CSRF-Token aus dem Meta-Tag abrufen
+const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 // Map building types to BOS units
 const BOSUnitMapping = {
     0: 'FW',   // Feuerwache
@@ -77,14 +78,14 @@ async function GetLocationAndDistrictFromCoordinates(lat, lon) {
     const response = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json`);
     const data = await response.json();
 
-    let location = data.address.village || data.address.town || data.address.city || "Unbekannter Standort";
+    let location = data.address.town || data.address.village || data.address.city || "Unbekannter Standort";
 
     // Stadtzuordnung überprüfen
     let districtAbbreviation = cityMapping[location];
 
     // Wenn keine Stadtzuordnung gefunden wurde, auf Landkreiszuordnung zurückfallen
     if (!districtAbbreviation) {
-      console.warn(`Stadt nicht in der Zuordnung gefunden: ${location}`);
+      console.warn(`Stadt nicht in der Zuordnung gefunden: ${location}, ${data.address.town}, ${data.address.city}`);
       let district = data.address.county || "Unbekannter Bezirk";
       districtAbbreviation = districtAbbreviations[district] || "XX";
     }
@@ -150,7 +151,7 @@ function showProgress(current, total) {
     var NewCaptionScheme = NewBuildingCaption.replace('{DistrictAbbreviation}', districtAbbreviation).replace('{BOS}', BOS).replace('{Location}', location);
 
     if (Building.caption === NewCaptionScheme) continue;
-
+    console.log(`Umbenennung wird versucht. Alter Name: ${Building.caption} / Neuer Name: ${NewCaptionScheme}`);
     try {
       var formData = new FormData();
       formData.append('utf8', '✓');
