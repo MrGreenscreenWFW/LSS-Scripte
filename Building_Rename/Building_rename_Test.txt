@@ -82,7 +82,7 @@ async function GetLocationAndDistrictFromCoordinates(lat, lon) {
     const data = await response.json();
 
     // Standortname ermitteln (city, town oder village)
-    let location = data.address.city || data.address.town || data.address.village || "Unbekannter Standort";
+    let location = data.address.city || data.address.town || data.address.village || data.address.city_district || "Unbekannter Standort";
     let locationWords = location.split(" ");
     if (locationWords[0] === "Bad" && locationWords.length > 1) {
       location = locationWords.slice(0, 2).join(" ");
@@ -92,11 +92,20 @@ async function GetLocationAndDistrictFromCoordinates(lat, lon) {
       location = locationWords[0];
     }
 
-    // Prüfen, ob die Stadt in der Stadtzuordnung vorhanden ist
-    if (stadt_zuordnung[location]) {
-      console.log(`Stadtzuordnung gefunden für: ${location}`);
-      const { districtAbbreviation } = stadt_zuordnung[location];
-      return { location, districtAbbreviation };
+    // Stadtname bereinigen und überprüfen
+    console.log(`Standortname: ${location}`);
+    location = location.trim();
+    console.log(`Bereinigter Standortname: ${location}`);
+
+    // Prüfen, ob die Stadt in der Stadtzuordnung vorhanden ist (case-insensitive)
+    const matchedCity = Object.keys(stadt_zuordnung).find(
+      key => key.toLowerCase() === location.toLowerCase()
+    );
+
+    if (matchedCity) {
+      console.log(`Stadtzuordnung gefunden für: ${matchedCity}`);
+      const districtAbbreviation = stadt_zuordnung[matchedCity];
+      return { location: matchedCity, districtAbbreviation };
     }
 
     // Primäre Abfrage für Landkreis oder Stadt
