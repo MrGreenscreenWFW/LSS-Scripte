@@ -95,7 +95,28 @@ async function GetLocationAndDistrictFromCoordinates(lat, lon) {
     return { location: "Unbekannter Standort", districtAbbreviation: "XX" };
   }
 }
+/**
+ * Ruft die Gebäude-Liste asynchron ab und gibt diese zurück.
+ * @return Array
+ */
+async function GetBuildingsAsync() {
+  const response = await $.ajax({
+    type: 'GET',
+    dataType: 'json',
+    url: `https://www.leitstellenspiel.de/api/buildings`
+  });
+  return response;
+}
 
+/**
+ * Zeigt einen Fortschrittsindikator in der Konsole an.
+ * @param {number} current - Aktueller Fortschritt.
+ * @param {number} total - Gesamtanzahl der Elemente.
+ */
+function showProgress(current, total) {
+  const percentage = Math.round((current / total) * 100);
+  console.log(`Fortschritt: ${current} von ${total} (${percentage}%)`);
+}
 // Skript-Initialisierung
 (async function() {
   console.log('Starte Umbenennung der Wachen...');
