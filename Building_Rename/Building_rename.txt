@@ -66,7 +66,7 @@ async function GetLocationAndDistrictFromCoordinates(lat, lon) {
     const data = await response.json();
     
     // Standortname ermitteln (entweder nur erstes Wort oder "Bad" + zweites Wort falls vorhanden)
-    let location = data.address.city || data.address.town || data.address.village || "Unbekannter Standort";
+    let location = data.address.village || data.address.town || data.address.city || "Unbekannter Standort";
     let locationWords = location.split(" ");
     if (locationWords[0] === "Bad" && locationWords.length > 1) {
       location = locationWords.slice(0, 2).join(" ");
