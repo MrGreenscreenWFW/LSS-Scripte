@@ -87,7 +87,7 @@ async function GetLocationAndDistrictFromCoordinates(lat, lon) {
 
     // Weitere Fallbacks, falls kein direkter Landkreis oder Stadt gefunden wurde
     if (!districtAbbreviation) {
-      district = data.address.town || data.address.suburb || "Unbekannter Bezirk";
+      district = data.address.town || data.address.suburb || data.adress.neighbourhood || "Unbekannter Bezirk";
       districtAbbreviation = districtAbbreviations[district] || "XX"; // Standardwert "XX" wenn keine Abkürzung gefunden wird
 
       // Loggen für Diagnosezwecke, falls nicht erkannt
