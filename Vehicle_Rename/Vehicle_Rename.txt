@@ -294,7 +294,16 @@ async function GetBuildingsAsync() {
 
     // Bedingung für das Hinzufügen von Zahlen prüfen
     const count = vehicleTypeCount[vehicle.building_id][vehicle.vehicle_type];
-    const formattedIndex = AddNumbersOnlyIfMultiple && count === 1 ? '' : count < 10 ? `0${count}` : count;
+    const formattedIndex = AddNumbersOnlyIfMultiple
+      ? count > 1 
+        ? count < 10 
+          ? `0${count}` 
+          : `${count}`
+        : ''  // Keine Nummer, wenn nur ein Fahrzeug vorhanden ist
+      : count < 10 
+        ? `0${count}` 
+        : `${count}`;
+
 
     // Neuen Fahrzeugnamen erstellen
     const NewCaptionScheme = NewCaption
