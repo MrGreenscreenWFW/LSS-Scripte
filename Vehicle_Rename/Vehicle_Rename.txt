@@ -5,7 +5,7 @@
  * @category   Mission Chief
  *
  * Skript zur automatischen Umbenennung von Fahrzeugen
- * Version: 1.2
+ * Version: 1.3
  * 
  * Beschreibung:
  * Dieses Script benennt die Fahrzeuge nach den entsprechenden Vorgaben um.
@@ -15,8 +15,12 @@
  * Alle Rechte vorbehalten.
  */
  
-// EINSTELLUNGEN; Platzhalter: {Building}, {VehicleName}, {VehicleType}, {Index}
-var NewCaption = '{Building} / {VehicleType}/{Index}';
+// EINSTELLUNGEN
+  // Platzhalter: {Building}, {VehicleName}, {VehicleType}, {Index}
+  var NewCaption = '{Building} / {VehicleType}/{Index}';
+
+  // Hinzufügen von Zahlen nur, wenn mehr als ein Fahrzeug desselben Typs vorhanden ist
+  var AddNumbersOnlyIfMultiple = false;
 
 // Mapping von vehicle_type-ID zu Klartextnamen
 const vehicleTypeMapping = {
@@ -152,7 +156,39 @@ const vehicleTypeMapping = {
   130: 'GW-Bt',
   131: 'FKH',
   132: 'BT-Kombi',
-  133: 'Bt LKW'
+  133: 'Bt LKW',
+  134: 'Pferdetransporter klein',
+  135: 'Pferdetransporter groß',
+  136: 'Anh Pferdetransport',
+  137: 'Zugfahrzeug Pferdetransport',
+  138: 'GW-Verpflegung',
+  139: 'GW-Küche',
+  140: 'MTW-Verpflegung',
+  141: 'FKH',
+  142: 'AB-Küche',
+  143: 'Anh Schlauch',
+  144: 'FüKW (THW)',
+  145: 'FüKomKW',
+  146: 'Anh FüLa',
+  147: 'FmKW',
+  148: 'MTW-FGr K',
+  149: 'GW-Bergrettung (NEF)',
+  150: 'GW-Bergrettung',
+  151: 'ELW Bergrettung',
+  152: 'ATV',
+  153: 'Hundestaffel (Bergrettung)',
+  154: 'Schneefahrzeug',
+  155: 'Anh Höhenrettung (Bergrettung)',
+  156: 'Polizeihubschrauber mit verbauter Winde',
+  157: 'RTH Winde',
+  158: 'GW-Höhenrettung (Bergrettung)',
+  159: 'Seenotrettungskreuzer',
+  160: 'Seenotrettungsboot',
+  161: 'Hubschrauber (Seenotrettung)',
+  162: 'RW-Schiene',
+  163: 'HLF Schiene',
+  164: 'AB-Schiene',
+  165: 'LauKw'
 };
 
 // Funktion zur Umwandlung der vehicle_type-ID in den Klartextnamen
@@ -256,10 +292,9 @@ async function GetBuildingsAsync() {
       vehicleTypeCount[vehicle.building_id][vehicle.vehicle_type]++;
     }
 
-    // Formatierter Index für den Fahrzeugtyp innerhalb der Wache
-    const formattedIndex = vehicleTypeCount[vehicle.building_id][vehicle.vehicle_type] < 10
-      ? `0${vehicleTypeCount[vehicle.building_id][vehicle.vehicle_type]}`
-      : vehicleTypeCount[vehicle.building_id][vehicle.vehicle_type];
+    // Bedingung für das Hinzufügen von Zahlen prüfen
+    const count = vehicleTypeCount[vehicle.building_id][vehicle.vehicle_type];
+    const formattedIndex = AddNumbersOnlyIfMultiple && count === 1 ? '' : count < 10 ? `0${count}` : count;
 
     // Neuen Fahrzeugnamen erstellen
     const NewCaptionScheme = NewCaption
