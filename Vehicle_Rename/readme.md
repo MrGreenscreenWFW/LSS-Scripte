@@ -24,7 +24,7 @@ Die Einstellungen des Skripts befinden sich am Anfang der Datei und können ange
 var NewCaption = '{Building} / {VehicleType}/{Index}';
 
 // Hinzufügen von Zahlen nur, wenn mehr als ein Fahrzeug desselben Typs vorhanden ist
-var AddNumbersOnlyIfMultiple = true;
+var AddNumbersOnlyIfMultiple = false;
 ```
 
 ### Platzhalter:
