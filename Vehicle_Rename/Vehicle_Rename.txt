@@ -23,7 +23,7 @@
   var AddNumbersOnlyIfMultiple = false;
 
   // Liste der zulässigen Gebäude-Typen (Leere Liste = alle Gebäude)
-  var AllowedBuildingTypes = []; // Beispiel: [2, 5] nur für Gebäude mit Typ-ID 2 oder 5
+  var AllowedBuildingTypes = [2]; // Beispiel: [2, 5] nur für Gebäude mit Typ-ID 2 oder 5
 
 // Mapping von vehicle_type-ID zu Klartextnamen
 const vehicleTypeMapping = {
@@ -261,20 +261,28 @@ async function GetBuildingsAsync() {
 (async function() {
   console.log('Starte Umbenennung der Fahrzeuge...');
 
-  // Gebäude- und Fahrzeug-Liste abrufen
+  // Gebäudeliste abrufen
   const buildingList = await GetBuildingsAsync();
-  const vehicleList = await GetVehiclesAsync();
 
   // Filtere Gebäude, falls eine Einschränkung auf Typen vorhanden ist
   const filteredBuildings = AllowedBuildingTypes.length > 0 
     ? buildingList.filter(building => AllowedBuildingTypes.includes(building.building_type))
     : buildingList;
+  // Fahrzeugliste abrufen
+  const allVehicles = await GetVehiclesAsync();
+  const filteredBuildingIds = filteredBuildings.map(building => building.id);
+  const vehicleList = allVehicles.filter(vehicle => filteredBuildingIds.includes(vehicle.building_id));
+
+  if (!vehicleList.length) {
+    console.error('Keine Fahrzeuge in den ausgewählten Gebäuden gefunden. Skript wird beendet.');
+    return;
+  }
 
   if (!filteredBuildings.length || !vehicleList.length) {
     console.error('Keine passenden Gebäude oder Fahrzeuge gefunden. Skript wird beendet.');
     return;
   }
-
+  
   console.log(`Anzahl der gefundenen Fahrzeuge: ${vehicleList.length}`);
 
   // Zuordnung von Gebäude-IDs zu ihren Namen
