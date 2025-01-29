@@ -5,7 +5,7 @@
  * @category   Mission Chief
  *
  * Skript zur automatischen Umbenennung von Fahrzeugen
- * Version: 1.4
+ * Version: 1.4.2
  * 
  * Beschreibung:
  * Dieses Script benennt die Fahrzeuge nach den entsprechenden Vorgaben um.
@@ -23,7 +23,7 @@
   var AddNumbersOnlyIfMultiple = false;
 
   // Liste der zulässigen Gebäude-Typen (Leere Liste = alle Gebäude)
-  var AllowedBuildingTypes = [2]; // Beispiel: [2, 5] nur für Gebäude mit Typ-ID 2 oder 5
+  var AllowedBuildingTypes = []; // Beispiel: [2, 5] nur für Gebäude mit Typ-ID 2 oder 5
 
 // Mapping von vehicle_type-ID zu Klartextnamen
 const vehicleTypeMapping = {
