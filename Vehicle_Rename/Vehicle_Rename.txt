@@ -191,7 +191,12 @@ const vehicleTypeMapping = {
   162: 'RW-Schiene',
   163: 'HLF Schiene',
   164: 'AB-Schiene',
-  165: 'LauKw'
+  165: 'LauKw',
+  166: 'PTLF 4000',
+  167: 'SLF',
+  168: 'Anh Sonderlöschmittel',
+  169: 'AB-Sonderlöschmittel',
+  170: 'AB-Wasser/Schaum'
 };
 
 // Funktion zur Umwandlung der vehicle_type-ID in den Klartextnamen
