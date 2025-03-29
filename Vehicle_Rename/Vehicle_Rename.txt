@@ -264,8 +264,9 @@ async function GetBuildingsAsync() {
 
 // Fortschrittsanzeige in der Konsole
 function showProgress(current, total) {
+  const remaining = total - current;
   const percentage = Math.round((current / total) * 100);
-  console.log(`Fortschritt: ${current} von ${total} (${percentage}%)`);
+  console.log(`Fortschritt: ${current} von ${total} (${percentage}%) - Verbleibend: ${remaining}`);
 }
 
 // Skript-Initialisierung
