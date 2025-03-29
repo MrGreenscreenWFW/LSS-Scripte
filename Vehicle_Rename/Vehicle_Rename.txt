@@ -262,6 +262,12 @@ async function GetBuildingsAsync() {
   }
 }
 
+// Fortschrittsanzeige in der Konsole
+function showProgress(current, total) {
+  const percentage = Math.round((current / total) * 100);
+  console.log(`Fortschritt: ${current} von ${total} (${percentage}%)`);
+}
+
 // Skript-Initialisierung
 (async function() {
   console.log('Starte Umbenennung der Fahrzeuge...');
@@ -273,6 +279,7 @@ async function GetBuildingsAsync() {
   const filteredBuildings = AllowedBuildingTypes.length > 0 
     ? buildingList.filter(building => AllowedBuildingTypes.includes(building.building_type))
     : buildingList;
+
   // Fahrzeugliste abrufen
   const allVehicles = await GetVehiclesAsync();
   const filteredBuildingIds = filteredBuildings.map(building => building.id);
@@ -283,11 +290,6 @@ async function GetBuildingsAsync() {
     return;
   }
 
-  if (!filteredBuildings.length || !vehicleList.length) {
-    console.error('Keine passenden Gebäude oder Fahrzeuge gefunden. Skript wird beendet.');
-    return;
-  }
-  
   console.log(`Anzahl der gefundenen Fahrzeuge: ${vehicleList.length}`);
 
   // Zuordnung von Gebäude-IDs zu ihren Namen
@@ -299,7 +301,12 @@ async function GetBuildingsAsync() {
   // Initialisiere Zähler für Fahrzeugtypen pro Wache
   const vehicleTypeCount = {};
 
+  let count = 0;
+
   for (const vehicle of vehicleList) {
+    count++;
+    showProgress(count, vehicleList.length); // Fortschritt anzeigen
+
     const buildingName = buildingNames[vehicle.building_id] || 'Unbekanntes Gebäude';
     const vehicleType = getVehicleTypeCaption(vehicle.vehicle_type);
 
@@ -314,15 +321,12 @@ async function GetBuildingsAsync() {
     }
 
     // Bedingung für das Hinzufügen von Zahlen prüfen
-    const count = vehicleTypeCount[vehicle.building_id][vehicle.vehicle_type];
+    const countForType = vehicleTypeCount[vehicle.building_id][vehicle.vehicle_type];
     const totalVehiclesOfType = vehicleList.filter(v => v.building_id === vehicle.building_id && v.vehicle_type === vehicle.vehicle_type).length;
 
     const formattedIndex = AddNumbersOnlyIfMultiple && totalVehiclesOfType === 1
       ? ''  // Keine Nummer, wenn nur ein Fahrzeug existiert und AddNumbersOnlyIfMultiple aktiv ist
-      : count < 10 ? `0${count}` : `${count}`;
-
-
-
+      : countForType < 10 ? `0${countForType}` : `${countForType}`;
 
     // Neuen Fahrzeugnamen erstellen
     const NewCaptionScheme = NewCaption
@@ -330,7 +334,6 @@ async function GetBuildingsAsync() {
       .replace('{VehicleType}', vehicleType)
       .replace('{Index}', formattedIndex);
 
-    // Ausgabe für Debugging - Zeigt das Fahrzeug und die geplante Umbenennung an
     console.log(`Fahrzeug ID ${vehicle.id}: Alter Name - ${vehicle.caption}, Neuer Name - ${NewCaptionScheme}`);
 
     if (vehicle.caption === NewCaptionScheme) {
