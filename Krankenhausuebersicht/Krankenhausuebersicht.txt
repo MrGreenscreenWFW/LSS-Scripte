@@ -1,0 +1,41 @@
+/*
+ * @author     MrGreenscreen aka. TiBo
+ * @category   Mission Chief
+ *
+ * Skript zur auflistung von Krankenhäusern mit Infos
+ * Version: 1.0
+ * 
+ * 
+ * @license    Attribution-NonCommercial-NoDerivs 4.0 Unported <http://creativecommons.org/licenses/by-nc-nd/4.0/>
+ * Copyright © 2025
+ * Alle Rechte vorbehalten.
+ */
+
+
+(async () => {
+  const buildings = await (await fetch("/api/buildings")).json();
+
+  const hospitals = buildings.filter(b => b.building_type === 4);
+
+  if (hospitals.length === 0) {
+    console.log("Keine Krankenhäuser gefunden.");
+    return;
+  }
+
+  for (const hospital of hospitals) {
+    const details = await (await fetch(`/api/buildings/${hospital.id}`)).json();
+
+    const ausbauten = details.extensions.map(ext => 
+      `${ext.caption} (${ext.available ? "✔️" : "❌"})`
+    ).join(", ") || "Keine Ausbauten";
+
+    // Korrektes Feld für Verbandsfreigabe
+    const verbandFreigegeben = details.is_alliance_shared ? "✅ freigegeben" : "❌ nicht freigegeben";
+
+    console.log(`🧱 ${hospital.caption} (ID: ${hospital.id})`);
+    console.log(`📍 Adresse: ${hospital.address}`);
+    console.log(`🏥 Ausbauten: ${ausbauten}`);
+    console.log(`🤝 Verbandsfreigabe: ${verbandFreigegeben}`);
+    console.log("------------------------------------------------------------");
+  }
+})();
