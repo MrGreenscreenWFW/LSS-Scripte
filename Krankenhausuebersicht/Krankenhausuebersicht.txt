@@ -29,11 +29,10 @@
       `${ext.caption} (${ext.available ? "✔️" : "❌"})`
     ).join(", ") || "Keine Ausbauten";
 
-    // Korrektes Feld für Verbandsfreigabe
     const verbandFreigegeben = details.is_alliance_shared ? "✅ freigegeben" : "❌ nicht freigegeben";
 
     console.log(`🧱 ${hospital.caption} (ID: ${hospital.id})`);
-    console.log(`📍 Adresse: ${hospital.address}`);
+    console.log(`🌍 Koordinaten: ${hospital.latitude}, ${hospital.longitude}`);
     console.log(`🏥 Ausbauten: ${ausbauten}`);
     console.log(`🤝 Verbandsfreigabe: ${verbandFreigegeben}`);
     console.log("------------------------------------------------------------");
