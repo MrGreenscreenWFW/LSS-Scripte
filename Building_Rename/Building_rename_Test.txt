@@ -151,6 +151,12 @@ function showProgress(current, total) {
     count++;
     showProgress(count, IBuildingList.length);
 
+    // Überprüfen, ob die ersten zwei Buchstaben großgeschrieben sind
+    if (/^[A-Z]{2}/.test(Building.caption) && !/^XX/.test(Building.caption)) {
+      console.log(`Überspringe Gebäude ID ${Building.id}, da der Name bereits mit zwei Großbuchstaben beginnt.`);
+      continue;
+    }
+
     // Standort und Landkreis-Abkürzung basierend auf Koordinaten ermitteln
     const { location, districtAbbreviation } = await GetLocationAndDistrictFromCoordinates(Building.latitude, Building.longitude);
     const BOS = BOSUnitMapping[Building.building_type] || 'BOS'; // BOS-Einheit basierend auf dem Gebäudetyp
