@@ -4,7 +4,7 @@
  * @category   Mission Chief
  *
  * Skript zur automatischen Umbenennung von Wachen
- * Version: 1.2
+ * Version: 1.3
  * 
  * Beschreibung:
  * Dieses Skript ruft eine Liste von Gebäuden ab, filtert nur relevante Wachen heraus und
@@ -22,7 +22,6 @@ var FilterBuildingType = [0, 2, 6, 9, 18, 19, 20]; // Nur Wachen-Typen: Feuerweh
 
 // Zuordnungstabelle für Landkreise und kreisfreie Städte in Bayern und Baden-Württemberg
 let districtAbbreviations = {};
-let stadt_zuordnung = {};
 
 /**
  * Laden der Landkreiszuordnung von Extern
@@ -32,25 +31,12 @@ async function LoadDistrictAbbreviations() {
   try {
     const response = await fetch ('https://raw.githubusercontent.com/MrGreenscreenWFW/LSS-Scripte/refs/heads/main/Building_Rename/landkreis_zuordnung.json');
     if (!response.ok) {
-        throw new Error(`Fehler beim Laden der Zuordnungen(LK und KFS): ${response.statusText}`);
+        throw new Error(`Fehler beim Laden der Zuordnungen: ${response.statusText}`);
     }
     districtAbbreviations = await response.json();
     console.log('Landkreis-Zuordnung erfolgreich geladen.');
   } catch (error) {
-    console.error('Fehler beim Laden der Zuordnung(LK und KFS);', error);
-  }
-}
-
-async function Loadstadtzuordnung() {
-  try {
-    const response = await fetch ('https://raw.githubusercontent.com/MrGreenscreenWFW/LSS-Scripte/refs/heads/main/Building_Rename/stadt_zuordnung.json');
-    if (!response.ok) {
-        throw new Error(`Fehler beim Laden der Zuordnungen (Städte): ${response.statusText}`);
-    }
-    stadt_zuordnung = await response.json();
-    console.log('Landkreis-Zuordnung erfolgreich geladen.');
-  } catch (error) {
-    console.error('Fehler beim Laden der Zuordnung(Städte);', error);
+    console.error('Fehler beim Laden der Zuordnung;', error);
   }
 }
 
@@ -76,13 +62,11 @@ const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute
  */
 async function GetLocationAndDistrictFromCoordinates(lat, lon) {
   try {
-    // Geocoding-API verwenden
-    console.log(`Verwende Geocoding-API für Koordinaten: ${lat}, ${lon}`);
     const response = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json`);
     const data = await response.json();
-
-    // Standortname ermitteln (city, town oder village)
-    let location = data.address.city || data.address.town || data.address.village || data.address.city_district || "Unbekannter Standort";
+    
+    // Standortname ermitteln (entweder nur erstes Wort oder "Bad" + zweites Wort falls vorhanden)
+    let location = data.address.village || data.address.town || data.address.city || "Unbekannter-Standort";
     let locationWords = location.split(" ");
     if (locationWords[0] === "Bad" && locationWords.length > 1) {
       location = locationWords.slice(0, 2).join(" ");
@@ -92,25 +76,7 @@ async function GetLocationAndDistrictFromCoordinates(lat, lon) {
       location = locationWords[0];
     }
 
-    // Stadtname bereinigen und überprüfen
-    console.log(`Standortname: ${location}`);
-    location = location.trim();
-    console.log(`Bereinigter Standortname: ${location}`);
-
-    // Prüfen, ob die Stadt in der Stadtzuordnung vorhanden ist (case-insensitive)
-    const matchedCity = Object.keys(stadt_zuordnung).find(
-      key => key.toLowerCase() === location.toLowerCase()
-    );
-
-    if (matchedCity) {
-      console.log(`Stadtzuordnung gefunden für: ${matchedCity}`);
-      const districtAbbreviation = stadt_zuordnung[matchedCity];
-      return { location: matchedCity, districtAbbreviation };
-    }
-
     // Primäre Abfrage für Landkreis oder Stadt
-    console.log(`Keine Stadtzuordnung gefunden. Geocoding-Ergebnisse:`, data.address);
-    console.log(`Starte primäre Abfrage für Koordinaten: ${lat}, ${lon}`);
     let district = data.address.county || data.address.city || data.address.state_district || data.address.municipality;
     let districtAbbreviation = districtAbbreviations[district];
 
@@ -121,7 +87,7 @@ async function GetLocationAndDistrictFromCoordinates(lat, lon) {
 
     // Weitere Fallbacks, falls kein direkter Landkreis oder Stadt gefunden wurde
     if (!districtAbbreviation) {
-      district = data.address.town || data.address.suburb || data.address.neighbourhood || "Unbekannter Bezirk";
+      district = data.address.town || data.address.suburb || data.adress.neighbourhood || "Unbekannter Bezirk";
       districtAbbreviation = districtAbbreviations[district] || "XX"; // Standardwert "XX" wenn keine Abkürzung gefunden wird
 
       // Loggen für Diagnosezwecke, falls nicht erkannt
@@ -184,12 +150,6 @@ function showProgress(current, total) {
   for (const Building of IBuildingList) {
     count++;
     showProgress(count, IBuildingList.length);
-
-    // Überprüfen, ob die ersten zwei Buchstaben großgeschrieben sind
-    if (/^[A-Z]{2}/.test(Building.caption) && !/^XX/.test(Building.caption)) {
-      console.log(`Überspringe Gebäude ID ${Building.id}, da der Name bereits mit zwei Großbuchstaben beginnt.`);
-      continue;
-    }
 
     // Standort und Landkreis-Abkürzung basierend auf Koordinaten ermitteln
     const { location, districtAbbreviation } = await GetLocationAndDistrictFromCoordinates(Building.latitude, Building.longitude);
