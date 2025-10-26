@@ -66,6 +66,7 @@ async function GetLocationAndDistrictFromCoordinates(lat, lon) {
     const data = await response.json();
     console.log(data);
     
+    
     // Standortname ermitteln (entweder nur erstes Wort oder "Bad" + zweites Wort falls vorhanden)
     let location = data.address.village || data.address.town || data.address.city || "Unbekannter-Standort";
     let locationWords = location.split(" ");
@@ -78,7 +79,14 @@ async function GetLocationAndDistrictFromCoordinates(lat, lon) {
     }
 
     // Primäre Abfrage für Landkreis oder Stadt
-    let district = data.address.county || data.address.city || data.address.state_district || data.address.municipality;
+    // Zeige die vier möglichen District-Felder zur Diagnose in der Konsole
+    const county = data.address.county || null;
+    const city = data.address.city || null;
+    const stateDistrict = data.address.state_district || null;
+    const municipality = data.address.municipality || null;
+    console.log('Geocoding Felder:', { county, city, stateDistrict, municipality });
+
+    let district = county || city || stateDistrict || municipality;
     let districtAbbreviation = districtAbbreviations[district];
 
     // Fallback: Stadt mit kreisfreien Städten abgleichen, falls keine Zuordnung gefunden wird
